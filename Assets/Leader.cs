@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class Leader : MonoBehaviour
 {
-    private readonly float mapWidth = 5, mapHeight = 15;
+    [SerializeField]
+    private float mapWidth = 5, mapHeight = 15, attackRange = 1.5F;
+    private readonly float unitsSize = 1;
     public GameObject followers;
     public GameObject enemy;
     private bool guard = true;
@@ -13,16 +15,8 @@ public class Leader : MonoBehaviour
 
     private void FollowersPositions()
     {
-
         var i = (float)Math.Floor(-followers.transform.childCount / 2F);
-        if (followers.transform.childCount % 2 == 0)
-        {
-            i += 0.5F;
-        }
-        else
-        {
-            i += 1;
-        }
+        i += followers.transform.childCount % 2 == 0 ? 0.5F : 1;
 
         var allPositions = new Dictionary<Vector3, bool>();
         foreach (var follow in followersUnits)
@@ -31,7 +25,7 @@ public class Leader : MonoBehaviour
             i++;
         }
 
-        AsignPositions(followersUnits, allPositions, true);
+        AsignPositions(followersUnits, allPositions);
     }
 
     private List<Unit> OrderUnits(Vector3 target)
@@ -43,22 +37,23 @@ public class Leader : MonoBehaviour
 
     private void Attack2Positions()
     {
-        const float d = 1;
-        const float radius = 1.5F;
-        const double circumference = 2 * Math.PI * radius;
-        const double pointsNum = circumference / d;
+        //if (attackRange <= Mathf.Epsilon) attackRange = 0.1F;
+        double circumference = 2 * Math.PI * attackRange;
+        double pointsNum = Math.Floor(circumference / unitsSize);
+        if (pointsNum < followersUnits.Count) pointsNum = followersUnits.Count;
         var enemyPosition = enemy.transform.position;
+
         var allPositions = new Dictionary<Vector3, bool>();
         for (var i = 0; i < pointsNum; i++)
         {
-            allPositions.Add(new Vector3((float)(enemyPosition.x + radius * Math.Cos(2 * Math.PI * i / pointsNum)), 0,
-                (float)(enemyPosition.z + radius * Math.Sin(2 * Math.PI * i / pointsNum))), true);
+            allPositions.Add(new Vector3((float)(enemyPosition.x + attackRange * Math.Cos(2 * Math.PI * i / pointsNum)), 0,
+                (float)(enemyPosition.z + attackRange * Math.Sin(2 * Math.PI * i / pointsNum))), true);
         }
         var allUnits = OrderUnits(enemyPosition);
-        AsignPositions(allUnits, allPositions, false);
+        AsignPositions(followersUnits, allPositions);
     }
 
-    private void AsignPositions(List<Unit> allUnits, Dictionary<Vector3, bool> allPositions, bool guardBool)
+    private void AsignPositions(List<Unit> allUnits, Dictionary<Vector3, bool> allPositions)
     {
         foreach (var follow in allUnits)
         {
@@ -70,7 +65,6 @@ public class Leader : MonoBehaviour
 
             allPositions[closerPos] = false;
             follow.targetPos = closerPos;
-            follow.guard = guardBool;
         }
     }
 

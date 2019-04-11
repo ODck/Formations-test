@@ -158,8 +158,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32576993a1ff4b4eb98c626d940bae6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  guard: 0
-  attacking: 0
   targetPos: {x: 0, y: 0, z: 0}
   leaderPos: {x: 0, y: 0, z: 0}
   velocity: 4
@@ -2099,8 +2097,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32576993a1ff4b4eb98c626d940bae6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  guard: 0
-  attacking: 0
   targetPos: {x: 0, y: 0, z: 0}
   leaderPos: {x: 0, y: 0, z: 0}
   velocity: 4
@@ -2383,8 +2379,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32576993a1ff4b4eb98c626d940bae6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  guard: 0
-  attacking: 0
   targetPos: {x: 0, y: 0, z: 0}
   leaderPos: {x: 0, y: 0, z: 0}
   velocity: 4
@@ -2687,8 +2681,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32576993a1ff4b4eb98c626d940bae6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  guard: 0
-  attacking: 0
   targetPos: {x: 0, y: 0, z: 0}
   leaderPos: {x: 0, y: 0, z: 0}
   velocity: 4
@@ -2891,6 +2883,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 091abd25966d4d58abf69ca2fd0b378a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapWidth: 5
+  mapHeight: 15
+  attackRange: 2
   followers: {fileID: 989716621}
   enemy: {fileID: 2043478547}
 --- !u!1 &2043478547

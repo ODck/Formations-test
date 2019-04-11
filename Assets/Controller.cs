@@ -34,15 +34,16 @@ public partial class Controller : MonoBehaviour
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection = moveDirection * speed;
 
-            if (Input.GetButton("Jump"))
+            if (Input.GetKey(KeyCode.Q))
             {
-                moveDirection.y = jumpSpeed;
+                transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + (Vector3.up * 5));
+            }
+            if (Input.GetKey(KeyCode.E))
+            {
+                transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + (Vector3.down * 5));
             }
         }
-
-        // Apply gravity
         moveDirection.y = moveDirection.y - (gravity * Time.deltaTime);
-
         // Move the controller
         controller.Move(moveDirection * Time.deltaTime);
     }
