@@ -5,8 +5,7 @@ using UnityEngine;
 
 public class Leader : MonoBehaviour
 {
-    [SerializeField]
-    private float mapWidth = 5, mapHeight = 15, attackRange = 1.5F;
+    public float mapWidth = 5, mapHeight = 10, attackRange = 1.5F;
     private readonly float unitsSize = 1;
     public GameObject followers;
     public GameObject enemy;
@@ -18,10 +17,17 @@ public class Leader : MonoBehaviour
         var i = (float)Math.Floor(-followers.transform.childCount / 2F);
         i += followers.transform.childCount % 2 == 0 ? 0.5F : 1;
 
-        var allPositions = new Dictionary<Vector3, bool>();
+        var allPositions = new List<Vector3>();
         foreach (var follow in followersUnits)
         {
-            allPositions.Add(transform.position - (transform.forward * 3) + (transform.right * (i * 2)), true);
+            var pos = transform.position - transform.forward * 3 + (transform.right * (i * 2));
+            //Clamp the limits of the map.
+            pos = new Vector3(
+                Mathf.Clamp(pos.x, -mapWidth, mapWidth),
+                pos.y,
+                Mathf.Clamp(pos.z, -mapHeight, mapHeight)
+            );
+            allPositions.Add(pos);
             i++;
         }
 
@@ -43,27 +49,26 @@ public class Leader : MonoBehaviour
         if (pointsNum < followersUnits.Count) pointsNum = followersUnits.Count;
         var enemyPosition = enemy.transform.position;
 
-        var allPositions = new Dictionary<Vector3, bool>();
+        var allPositions = new List<Vector3>();
         for (var i = 0; i < pointsNum; i++)
         {
-            allPositions.Add(new Vector3((float)(enemyPosition.x + attackRange * Math.Cos(2 * Math.PI * i / pointsNum)), 0,
-                (float)(enemyPosition.z + attackRange * Math.Sin(2 * Math.PI * i / pointsNum))), true);
+            allPositions.Add(new Vector3((float)(enemyPosition.x + attackRange * Math.Cos(-Math.PI * i / pointsNum)), 0,
+                (float)(enemyPosition.z + attackRange * Math.Sin( -Math.PI * i / pointsNum))));
         }
         var allUnits = OrderUnits(enemyPosition);
         AsignPositions(followersUnits, allPositions);
     }
 
-    private void AsignPositions(List<Unit> allUnits, Dictionary<Vector3, bool> allPositions)
+    private void AsignPositions(List<Unit> allUnits, List<Vector3> allPositions)
     {
         foreach (var follow in allUnits)
         {
             var closerPos =
                 (from pos in allPositions
-                 where pos.Value == true
-                 orderby Vector3.Distance(follow.Position, pos.Key)
-                 select pos.Key).First();
+                 orderby Vector3.Distance(follow.Position, pos)
+                 select pos).First();
 
-            allPositions[closerPos] = false;
+            allPositions.Remove(closerPos);
             follow.targetPos = closerPos;
         }
     }

@@ -46,5 +46,9 @@ public partial class Controller : MonoBehaviour
         moveDirection.y = moveDirection.y - (gravity * Time.deltaTime);
         // Move the controller
         controller.Move(moveDirection * Time.deltaTime);
+        var realPos = new Vector3(transform.position.x,transform.position.y,transform.position.z);
+        realPos.x = Mathf.Clamp(realPos.x, -5, 5);
+        realPos.z = Mathf.Clamp(realPos.z, -10, 10);
+        transform.position = realPos;
     }
 }
