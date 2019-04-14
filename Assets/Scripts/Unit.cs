@@ -1,24 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Experimental.PlayerLoop;
 
 public class Unit : MonoBehaviour
 {
+    public Color color;
+
+    [HideInInspector] public Vector3 leaderPos;
+
+    [HideInInspector] public Vector3 targetPos;
+
+    public float velocity = 4;
+
     public Vector3 Position
     {
         get => transform.position;
-        set => transform.position = value;
+        private set => transform.position = value;
     }
-    [HideInInspector]
-    public Vector3 targetPos;
-    [HideInInspector]
-    public Vector3 leaderPos;   
-
-    public float velocity = 4;
-    public Color color;
 
     private void Start()
     {
@@ -36,11 +32,7 @@ public class Unit : MonoBehaviour
         leaderPos = targetPos;
         //leaderPos = leader.transform.position;
         var totalDistance = Vector3.Distance(Position, leaderPos);
-        if (totalDistance > guardRange)
-        {
-            Move();
-            //transform.Trans//(delta,tickDistance);
-        }
+        if (totalDistance > guardRange) Move();
     }
 
     private void Move()
