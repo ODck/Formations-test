@@ -10,15 +10,16 @@ public class Controller : MonoBehaviour
     public float gravity = 20.0f;
     private Vector3 moveDirection = Vector3.zero;
     public float speed = 6.0f;
+    private Leader leader;
 
     private void Start()
     {
+        leader = FindObjectOfType<Leader>();
         controller = GetComponent<CharacterController>();
     }
 
     private void Update()
     {
-
         moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
         moveDirection = transform.TransformDirection(moveDirection);
         moveDirection = moveDirection * speed;
@@ -32,11 +33,11 @@ public class Controller : MonoBehaviour
         moveDirection.y = moveDirection.y - gravity * Time.deltaTime;
         // Move the controller
         controller.Move(moveDirection * Time.deltaTime);
-        
+
         var position = transform.position;
         var realPos = new Vector3(position.x, position.y, position.z);
-        realPos.x = Mathf.Clamp(realPos.x, -5, 5);
-        realPos.z = Mathf.Clamp(realPos.z, -10, 10);
+        realPos.x = Mathf.Clamp(realPos.x, -leader.mapWidth, leader.mapWidth);
+        realPos.z = Mathf.Clamp(realPos.z, -leader.mapHeight, leader.mapHeight);
         transform.position = realPos;
     }
 }
