@@ -1,5 +1,5 @@
 # Formations
-Example implementation of units moving in formation. Without NavMesh.
+Example implementation of units moving in formation. Without NavMesh or collider.
 
 ### Attack Formation
 ---
