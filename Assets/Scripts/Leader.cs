@@ -104,7 +104,8 @@ public class Leader : MonoBehaviour
         var positions = new List<Vector3>();
 
         //Option 1: Hero away from the walls
-        if (Math.Abs(enemyPosition.x) < (mapWidth - attackRange) && Math.Abs(enemyPosition.z) < (mapHeight - attackRange))
+        if (Math.Abs(enemyPosition.x) < (mapWidth - attackRange) &&
+            Math.Abs(enemyPosition.z) < (mapHeight - attackRange))
             for (var i = 0; i < pointsNum; i++)
                 positions.Add(new Vector3(
                     (float) (enemyPosition.x +
@@ -114,7 +115,8 @@ public class Leader : MonoBehaviour
                              attackRange * (Math.Sin(2 * Math.PI * i / pointsNum)))));
 
         //Option 2: In a side but away from top or bot.
-        else if (Math.Abs(Math.Abs(enemyPosition.x) - (mapWidth - attackRange)) < Mathf.Epsilon && Math.Abs(enemyPosition.z) < (mapHeight - attackRange))
+        else if (Math.Abs(Math.Abs(enemyPosition.x) - (mapWidth - attackRange)) < Mathf.Epsilon &&
+                 Math.Abs(enemyPosition.z) < (mapHeight - attackRange))
             for (var i = 0; i < pointsNum; i++)
             {
                 var vector3 = new Vector3(
@@ -134,7 +136,8 @@ public class Leader : MonoBehaviour
                 positions.Add(vector3);
             }
         //Option 3: In top or bot but away from the sides
-        else if (Math.Abs(enemyPosition.x) < (mapWidth - attackRange) && Math.Abs(Math.Abs(enemyPosition.z) - (mapHeight - attackRange)) < Mathf.Epsilon)
+        else if (Math.Abs(enemyPosition.x) < (mapWidth - attackRange) &&
+                 Math.Abs(Math.Abs(enemyPosition.z) - (mapHeight - attackRange)) < Mathf.Epsilon)
             for (var i = 0; i < pointsNum; i++)
                 positions.Add(new Vector3(
                     (float) (enemyPosition.x +
@@ -143,7 +146,8 @@ public class Leader : MonoBehaviour
                     (float) (enemyPosition.z +
                              attackRange * (Math.Sin(Math.PI * i / pointsNum)) * (Mathf.Sign(enemyPosition.z) * -1))));
         //Option 4: In a corner
-        else if (Math.Abs(Math.Abs(enemyPosition.x) - (mapWidth - attackRange)) < Mathf.Epsilon && Math.Abs(Math.Abs(enemyPosition.z) - (mapHeight - attackRange)) < Mathf.Epsilon)
+        else if (Math.Abs(Math.Abs(enemyPosition.x) - (mapWidth - attackRange)) < Mathf.Epsilon &&
+                 Math.Abs(Math.Abs(enemyPosition.z) - (mapHeight - attackRange)) < Mathf.Epsilon)
             for (var i = 0; i < pointsNum; i++)
                 positions.Add(new Vector3(
                     (float) (enemyPosition.x +
@@ -154,12 +158,13 @@ public class Leader : MonoBehaviour
                              attackRange * (Math.Sin(Math.PI / 2 * i / pointsNum)) *
                              (Mathf.Sign(enemyPosition.z) * -1))));
         //Option 5: Close to a corner
-        else if (Math.Abs(enemyPosition.x) > (mapWidth - attackRange) && Math.Abs(enemyPosition.z) > (mapHeight - attackRange))
+        else if (Math.Abs(enemyPosition.x) > (mapWidth - attackRange) &&
+                 Math.Abs(enemyPosition.z) > (mapHeight - attackRange))
         {
             //Angles alpha and beta
             var asinA = Math.Asin(Math.Abs(distanceX / attackRange));
             var asinB = Math.Asin(Math.Abs(distanceY / attackRange));
-            var wallAngle =(Math.PI / 2) + asinA + asinB;
+            var wallAngle = (Math.PI / 2) + asinA + asinB;
             for (var i = 0; i < pointsNum; i++)
             {
                 //We get the points of the arc.
@@ -174,7 +179,7 @@ public class Leader : MonoBehaviour
                 //Rotate the points. To match with the intersections.
                 var angleNew = Mathf.Atan(distanceY / attackRange) * Mathf.Sign(enemyPosition.z);
                 angleNew = -angleNew * Mathf.Sign(enemyPosition.x) * Mathf.Sign(enemyPosition.z);
-                
+
                 var rotatedX = Math.Cos(angleNew) * (vector3.x - enemyPosition.x) -
                                Math.Sin(angleNew) * (vector3.z - enemyPosition.z) + enemyPosition.x;
                 var rotatedY = Math.Sin(angleNew) * (vector3.x - enemyPosition.x) +
@@ -183,9 +188,69 @@ public class Leader : MonoBehaviour
                 positions.Add(vector3);
             }
         }
+        //Option 6: Close to top or bot and away from sides.
+        else if (Math.Abs(enemyPosition.x) <= (mapWidth - attackRange) &&
+                 Math.Abs(enemyPosition.z) > (mapHeight - attackRange))
+        {
+            var asinA = Math.Asin(Math.Abs(distanceY / attackRange));
+            var wallAngle = Math.PI + asinA * 2;
+
+            for (var i = 0; i < pointsNum; i++)
+            {
+                //We get the points of the arc.
+                var vector3 = new Vector3(
+                    (float) (enemyPosition.x +
+                             attackRange * (Math.Cos(wallAngle * i / pointsNum))),
+                    0,
+                    (float) (enemyPosition.z +
+                             attackRange * (Math.Sin(wallAngle * i / pointsNum)) *
+                             (Mathf.Sign(enemyPosition.z) * -1)));
+                //Rotate the points. To match with the intersections.
+                var angleNew = Mathf.Atan(distanceY / attackRange);// * Mathf.Sign(enemyPosition.z);
+                //angleNew = angleNew * Mathf.Sign(enemyPosition.x) * Mathf.Sign(enemyPosition.z);
+
+                var rotatedX = Math.Cos(angleNew) * (vector3.x - enemyPosition.x) -
+                               Math.Sin(angleNew) * (vector3.z - enemyPosition.z) + enemyPosition.x;
+                var rotatedY = Math.Sin(angleNew) * (vector3.x - enemyPosition.x) +
+                               Math.Cos(angleNew) * (vector3.z - enemyPosition.z) + enemyPosition.z;
+                vector3 = new Vector3((float) rotatedX, 0, (float) rotatedY);
+                positions.Add(vector3);
+            }
+        }
+        //Option 7: Close to sides and away top or bot.
+        else if (Math.Abs(enemyPosition.x) > (mapWidth - attackRange) &&
+                 Math.Abs(enemyPosition.z) <= (mapHeight - attackRange))
+        {
+            var asinA = Math.Asin(Math.Abs(distanceX / attackRange));
+            var wallAngle = Math.PI + asinA * 2;
+
+            for (var i = 0; i < pointsNum; i++)
+            {
+                //We get the points of the arc.
+                var vector3 = new Vector3(
+                    (float) (enemyPosition.x +
+                             attackRange * (Math.Cos(wallAngle * i / pointsNum)) *
+                             (Mathf.Sign(enemyPosition.x) * -1)),
+                    0,
+                    (float) (enemyPosition.z +
+                             attackRange * (Math.Sin(wallAngle * i / pointsNum))));
+                //Rotate the points. To match with the intersections.
+                var angleNew = Mathf.Atan(distanceX / attackRange);// * Mathf.Sign(enemyPosition.x);
+                angleNew = (float) (angleNew + Math.PI / 2 * Mathf.Sign(enemyPosition.x));
+                //angleNew = -angleNew * Mathf.Sign(enemyPosition.x) * Mathf.Sign(enemyPosition.z);
+                var rotatedX = Math.Cos(angleNew) * (vector3.x - enemyPosition.x) -
+                               Math.Sin(angleNew) * (vector3.z - enemyPosition.z) + enemyPosition.x;
+                var rotatedY = Math.Sin(angleNew) * (vector3.x - enemyPosition.x) +
+                               Math.Cos(angleNew) * (vector3.z - enemyPosition.z) + enemyPosition.z;
+                vector3 = new Vector3((float) rotatedX, 0, (float) rotatedY);                
+                positions.Add(vector3);
+            }
+        }
         else
         {
-            Debug.Log(Math.Abs(enemyPosition.x) + " x vs " + (mapWidth-attackRange) + " " + Math.Abs(enemyPosition.z) + " z " +(mapHeight - attackRange));
+            Debug.Log(Math.Abs(enemyPosition.x) + " x vs " + (mapWidth - attackRange) + " " +
+                      Math.Abs(enemyPosition.z) + " z " + (mapHeight - attackRange));
+            throw new NotSupportedException();
         }
 
         AssignPositions(followersUnits, positions);
