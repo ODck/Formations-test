@@ -4,7 +4,7 @@ Example implementation of units moving in formation. Without NavMesh or collider
 ### Attack Formation
 ---
 
-![](Media/formationAttack.gif)
+![Attack Behaviour](Media/formationAttack.gif)
 
 
 The units will try to surround the enemy.
@@ -16,7 +16,7 @@ Maybe you want to move the enemy manually in scene view.
 ### Defend Formation
 ---
 
-![](Media/formationDefense.gif)
+![Defend Behaviour](Media/formationDefense.gif)
 
 The units will follow the player behind him.
 
