@@ -8,10 +8,19 @@ Example implementation of units moving in formation. Without NavMesh or collider
 
 
 The units will try to surround the enemy.
+
 If the enemy is close to a wall, the will occupy the available arc.
 
-### Defend Formation
+Maybe you want to move the enemy manually in scene view.
 
+### Defend Formation
+---
+
+![](Media/formationDefense.gif)
+
+The units will follow the player behind him.
+
+They will be divided in 2 rows.
 
 ## Controls
 Left click - Defend, behind the player.
