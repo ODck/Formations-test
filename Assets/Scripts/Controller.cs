@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Behaviours;
+using Settings;
+using UnityEngine;
 
 // The GameObject is made to bounce using the space key.
 // Also the GameObject can be moved forward/backward and left/right.
@@ -10,11 +12,9 @@ public class Controller : MonoBehaviour
     public float gravity = 20.0f;
     private Vector3 moveDirection = Vector3.zero;
     public float speed = 6.0f;
-    private Leader leader;
 
     private void Start()
     {
-        leader = FindObjectOfType<Leader>();
         controller = GetComponent<CharacterController>();
     }
 
@@ -36,8 +36,8 @@ public class Controller : MonoBehaviour
 
         var position = transform.position;
         var realPos = new Vector3(position.x, position.y, position.z);
-        realPos.x = Mathf.Clamp(realPos.x, -leader.mapWidth, leader.mapWidth);
-        realPos.z = Mathf.Clamp(realPos.z, -leader.mapHeight, leader.mapHeight);
+        realPos.x = Mathf.Clamp(realPos.x, -SettingsLoader.MapWidth, SettingsLoader.MapWidth);
+        realPos.z = Mathf.Clamp(realPos.z, -SettingsLoader.MapHeight, SettingsLoader.MapHeight);
         transform.position = realPos;
     }
 }

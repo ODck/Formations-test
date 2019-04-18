@@ -34,6 +34,7 @@ public class Unit : MonoBehaviour
         var totalDistance = Vector3.Distance(Position, leaderPos);
         if (totalDistance > guardRange) Move();
     }
+
     private void Move()
     {
         var tickDistance = velocity * Time.deltaTime;
