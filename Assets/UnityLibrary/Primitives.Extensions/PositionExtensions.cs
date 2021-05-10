@@ -13,7 +13,7 @@ namespace UnityLibrary.Primitives.Extensions
         
         public static Vector3 PositionToVector3(this Vector2 pos)
         {
-            return new Vector3(pos.Y, 0, pos.Y);
+            return new Vector3(pos.X, 0, pos.Y);
         }
 
         public static Vector2 Vector3ToVector2(this Vector3 position)

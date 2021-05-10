@@ -9,24 +9,26 @@ namespace Dck.Pathfinder
     public class DijkstraGrid
     {
         public readonly DijkstraTile[,] DijkstraTiles;
-        public readonly DijkstraTile Destination;
+        public DijkstraTile Destination { get; private set; }
         private readonly GameMap _gameMap;
         public Vector2Uint GridSize { get; }
 
         public uint Columns => GridSize.X;
         public uint Rows => GridSize.Y;
 
-        private DijkstraGrid(DijkstraTile[,] tiles, DijkstraTile target)
+        private DijkstraGrid(DijkstraTile[,] tiles, DijkstraTile target, GameMap gameMap)
         {
             GridSize = new Vector2Uint(tiles.GetLength(0), tiles.GetLength(1));
             CheckGridSize(GridSize);
             DijkstraTiles = tiles;
+            Destination = target;
+            _gameMap = gameMap;
             GenerateFlowField();
         }
 
-        public static DijkstraGrid Create(DijkstraTile[,] tiles, DijkstraTile target)
+        public static DijkstraGrid Create(DijkstraTile[,] tiles, DijkstraTile target, GameMap gameMap)
         {
-            return new DijkstraGrid(tiles, target);
+            return new DijkstraGrid(tiles, target, gameMap);
         }
 
         public static DijkstraGrid CreateFromGameMap(GameMap gameMap, uint destinationX, uint destinationY)
@@ -53,6 +55,12 @@ namespace Dck.Pathfinder
             }
 
             if (destination == null) throw new NullReferenceException("destination is null");
+            SetWeights(gameMap, destination, tiles);
+            return new DijkstraGrid(tiles, destination, gameMap);
+        }
+
+        private static void SetWeights(GameMap gameMap, DijkstraTile destination, DijkstraTile[,] tiles)
+        {
             destination.Weight = 0;
             var toCheckNeighbours = new Queue<DijkstraTile>();
             var visited = new HashSet<DijkstraTile>();
@@ -70,8 +78,6 @@ namespace Dck.Pathfinder
                     visited.Add(dijkstraTile);
                 }
             }
-
-            return new DijkstraGrid(tiles, destination);
         }
 
         private static void CheckGridSize(Vector2Uint gridSize)
@@ -169,45 +175,49 @@ namespace Dck.Pathfinder
             var southwest = IsValid(x - 1, y - 1);
 
             //Check clockwise
+            //Nested ifs bc, we dont want to traverse between corners
             if (west)
             {
                 neighbours.Add(DijkstraTiles[x - 1, y]);
-            }
-
-            if (northwest)
-            {
-                neighbours.Add(DijkstraTiles[x - 1, y + 1]);
+                
+                if (northwest)
+                {
+                    neighbours.Add(DijkstraTiles[x - 1, y + 1]);
+                }
             }
 
             if (north)
             {
                 neighbours.Add(DijkstraTiles[x, y + 1]);
+                
+                if (northeast)
+                {
+                    neighbours.Add(DijkstraTiles[x + 1, y + 1]);
+                }
             }
-
-            if (northeast)
-            {
-                neighbours.Add(DijkstraTiles[x + 1, y + 1]);
-            }
+            
 
             if (east)
             {
                 neighbours.Add(DijkstraTiles[x + 1, y]);
+                
+                if (southeast)
+                {
+                    neighbours.Add(DijkstraTiles[x + 1, y - 1]);
+                }
             }
-
-            if (southeast)
-            {
-                neighbours.Add(DijkstraTiles[x + 1, y - 1]);
-            }
+            
 
             if (south)
             {
                 neighbours.Add(DijkstraTiles[x, y - 1]);
+                
+                if (southwest)
+                {
+                    neighbours.Add(DijkstraTiles[x - 1, y - 1]);
+                }
             }
-
-            if (southwest)
-            {
-                neighbours.Add(DijkstraTiles[x - 1, y - 1]);
-            }
+            
 
             return neighbours;
         }
@@ -220,6 +230,23 @@ namespace Dck.Pathfinder
         private bool IsValid(int x, int y)
         {
             return IsValid(x, y, GridSize, DijkstraTiles);
+        }
+
+        public void TryRecalculateGrid(uint x, uint y)
+        {
+            //TODO: don't if has no targets
+            if (Destination.Position.X == x && Destination.Position.Y == y)
+            {
+                return;
+            }
+            RecalculateGrid(x, y);
+        }
+
+        private void RecalculateGrid(uint x, uint y)
+        {
+            Destination = DijkstraTiles[x, y];
+            SetWeights(_gameMap, Destination, DijkstraTiles);
+            GenerateFlowField();
         }
     }
 }

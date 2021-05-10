@@ -6,10 +6,10 @@ namespace Dck.Pathfinder
     {
         private Vector2 _direction;
         public Vector2 position;
-        private const float Smooth = 0.01F;
+        private const float Smooth = 0.0075F;
         public bool SteeringActive { get; set; } = true;
 
-        public Vector2 GetNextDirectionVector(GameMap gameMap, DijkstraGrid grid)
+        public Vector2 GetNextDirectionVector(GameMap gameMap, DijkstraGrid grid, float velocity)
         {
             var dir = _direction;
             var cellPos = gameMap.GetCellPositionFromWorld(position.X, position.Y);
@@ -19,7 +19,7 @@ namespace Dck.Pathfinder
             if (SteeringActive)
             {
                 dir -= _direction;
-                _direction += dir * Smooth;
+                _direction += dir * Smooth * velocity;
             }
             else
             {
