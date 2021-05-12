@@ -63,6 +63,11 @@ namespace UnityLibrary
 
         public void RandomizeDestination()
         {
+            if (_gameMap == null)
+            {
+                Invoke(nameof(RandomizeDestination), 0.001F);
+                return;
+            }
             var i = (uint) _random.Next(0, (int) _gameMap.Width);
             var j = (uint) _random.Next(0, (int) _gameMap.Height);
             var tileType = _gameMap.GetCellAt(i, j);

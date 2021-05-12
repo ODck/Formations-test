@@ -234,7 +234,6 @@ namespace Dck.Pathfinder
 
         public void TryRecalculateGrid(uint x, uint y)
         {
-            //TODO: don't if has no targets
             if (Destination.Position.X == x && Destination.Position.Y == y)
             {
                 return;

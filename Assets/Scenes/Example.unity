@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 2.7
+  m_AmbientIntensity: 2.3
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
@@ -142,7 +142,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &219138537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,6 +288,7 @@ GameObject:
   m_Component:
   - component: {fileID: 335878437}
   - component: {fileID: 335878436}
+  - component: {fileID: 335878438}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -307,7 +308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 940cbc4f3d8c4404b76a30f475ddcc12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _draw: {fileID: 1986015026}
+  spawner: {fileID: 335878438}
 --- !u!4 &335878437
 Transform:
   m_ObjectHideFlags: 0
@@ -322,6 +323,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &335878438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 335878435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39cfadd138b34931a5c35084d4528eb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agents: []
+  destinations: []
+  agentPrefab: {fileID: 219138537}
+  destinationPrefab: {fileID: 1986015026}
 --- !u!1 &733302869
 GameObject:
   m_ObjectHideFlags: 0
