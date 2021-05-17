@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Dck.Pathfinder.Primitives;
 
-namespace Dck.Pathfinder
+namespace Server.vendor.Pathfinder
 {
     public class DijkstraTile
     {

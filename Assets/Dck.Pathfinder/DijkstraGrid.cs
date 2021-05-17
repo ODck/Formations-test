@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dck.Pathfinder.Primitives;
+using JetBrains.Annotations;
+using Server.vendor.Pathfinder;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Dck.Pathfinder
 {
+    [PublicAPI]
     public class DijkstraGrid
     {
         public readonly DijkstraTile[,] DijkstraTiles;
@@ -34,10 +37,10 @@ namespace Dck.Pathfinder
         public static DijkstraGrid CreateFromGameMap(GameMap gameMap, uint destinationX, uint destinationY)
         {
             DijkstraTile destination = null;
-            var tiles = new DijkstraTile[gameMap.Height, gameMap.Width];
-            for (var i = 0; i < gameMap.Height; i++)
+            var tiles = new DijkstraTile[gameMap.Width, gameMap.Height];
+            for (var i = 0; i < gameMap.Width; i++)
             {
-                for (var j = 0; j < gameMap.Width; j++)
+                for (var j = 0; j < gameMap.Height; j++)
                 {
                     //var tilePos = Vector2.UnitX * (i * GameMap.CellSize) + Vector2.UnitY * (j * GameMap.CellSize);
                     var tile = new DijkstraTile(new Vector2(i, j));
@@ -97,9 +100,9 @@ namespace Dck.Pathfinder
 
         public void GenerateFlowField()
         {
-            for (var i = 0; i < Rows; i++)
+            for (var i = 0; i < Columns; i++)
             {
-                for (var j = 0; j < Columns; j++)
+                for (var j = 0; j < Rows; j++)
                 {
                     var tile = DijkstraTiles[i, j];
                     if (tile.Weight == int.MaxValue) continue;

@@ -46,7 +46,7 @@ namespace UnityLibrary
             }
 
             const float velocity = 6F;
-            _agent.position = transform.position.Vector3ToVector2();
+            _agent.Position = transform.position.Vector3ToVector2();
             var dir = _agent.GetNextDirectionVector(_gameMap, _destination.FlowField, velocity);
             if (dir != Vector2.Zero && (transform.position - _destination.transform.position).magnitude > 1F)
             {

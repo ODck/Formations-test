@@ -1,19 +1,22 @@
 ﻿using System.Numerics;
+using Dck.Pathfinder.Primitives;
+using Server.vendor.Pathfinder;
 
 namespace Dck.Pathfinder
 {
     public class SteeringAgent
     {
         private Vector2 _direction;
-        public Vector2 position;
-        private const float Smooth = 0.0075F;
+        public Vector2 Position;
+        public Vector2Uint CellPos { get; private set; }
+        private const float Smooth = 0.09F;//0.0075F;
         public bool SteeringActive { get; set; } = true;
 
         public Vector2 GetNextDirectionVector(GameMap gameMap, DijkstraGrid grid, float velocity)
         {
             var dir = _direction;
-            var cellPos = gameMap.GetCellPositionFromWorld(position.X, position.Y);
-            var flow = grid.DijkstraTiles[cellPos.X, cellPos.Y].FlowDirection;
+            CellPos = gameMap.GetCellPositionFromWorld(Position.X, Position.Y);
+            var flow = grid.DijkstraTiles[CellPos.X, CellPos.Y].FlowDirection;
             if (flow != Vector2.Zero)
                 dir = flow;
             if (SteeringActive)
