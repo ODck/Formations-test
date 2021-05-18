@@ -1,6 +1,5 @@
 ﻿using Dck.Pathfinder;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityLibrary.Primitives.Extensions;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
@@ -39,25 +38,21 @@ namespace UnityLibrary
 
                     Debug.Log($"{_minWidth} {_minHeight} {_maxWidth} {_maxHeight}");
 
-                    agent = new SteeringAgent
-                    {
-                        SteeringActive = true
-                    };
+                    agent = new SteeringAgent(_gameMap);
                 }
             }
         }
 
         public void Move()
         {
-            const float velocity = 6F;
             agent.Position = transform.position.Vector3ToVector2();
 
             if (!((transform.position - destination.transform.position).magnitude > 1F)) return;
             
-            var dir = destination.pathFinder.GetDirection(agent);
+            var dir = destination.pathFinder.GetDirection(agent, _debugDir, SteeringOptions.AgentsSpeed, Time.deltaTime);
             if(dir == Vector2.Zero) return;
             dir = Vector2.Normalize(dir);
-            transform.Translate(new Vector3(dir.X, 0, dir.Y) * (velocity * Time.deltaTime));
+            transform.Translate(new Vector3(dir.X, 0, dir.Y) * (SteeringOptions.AgentsSpeed * Time.deltaTime));
             var pos = transform.position;
             var clampedPos = new Vector3(Mathf.Clamp(pos.x, _minWidth, _maxWidth), 0,
                 Mathf.Clamp(pos.z, _minHeight, _maxHeight));
@@ -70,14 +65,6 @@ namespace UnityLibrary
             if (_debugDir == Vector2.Zero) return;
             var position = transform.position;
             Gizmos.DrawLine(position, position + _debugDir.PositionToVector3().normalized);
-        }
-
-        public bool UseSteering(bool value)
-        {
-            if (agent == null) return !value;
-            Debug.Log("Steering " + value);
-            agent.SteeringActive = value;
-            return value;
         }
 
         public void RandomizeOrigin()

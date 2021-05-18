@@ -7,31 +7,29 @@ namespace Dck.Pathfinder
     public class SteeringAgent
     {
         public readonly float ColliderRadius = 0.5F;
-        private Vector2 _direction;
-        public Vector2 Position;
-        public Vector2Uint CellPos { get; private set; }
-        private const float Smooth = 0.0075F;
-        public bool SteeringActive { get; set; } = true;
-        public bool AvoidOthers { get; set; } = true;
+        private Vector2 _position;
+        private readonly GameMap _gameMap;
 
-        public Vector2 GetNextDirectionVector(GameMap gameMap, DijkstraGrid grid, float velocity)
+        public Vector2 Position
         {
-            var dir = _direction;
-            CellPos = gameMap.GetCellPositionFromWorld(Position.X, Position.Y);
-            var flow = grid.DijkstraTiles[CellPos.X, CellPos.Y].FlowDirection;
-            if (flow != Vector2.Zero)
-                dir = flow;
-            if (SteeringActive)
+            get => _position;
+            set
             {
-                dir -= _direction;
-                _direction += dir * Smooth * velocity;
+                CellPos = _gameMap.GetCellPositionFromWorld(Position.X, Position.Y);
+                _position = value;
             }
-            else
-            {
-                _direction = dir;
-            }
+        }
 
-            return _direction;
+        public SteeringAgent(GameMap gameMap)
+        {
+            _gameMap = gameMap;
+        }
+
+        public Vector2Uint CellPos { get; private set; }
+
+        public Vector2 GetNextDirectionVector(DijkstraGrid grid)
+        {
+            return grid.DijkstraTiles[CellPos.X, CellPos.Y].FlowDirection;
         }
     }
 }

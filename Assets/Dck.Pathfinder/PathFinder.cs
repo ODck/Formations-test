@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 using Vector2 = System.Numerics.Vector2;
 
@@ -69,12 +71,10 @@ namespace Dck.Pathfinder
         }
 
         //https://gamedevelopment.tutsplus.com/tutorials/understanding-steering-behaviors-collision-avoidance--gamedev-7777
-        public Vector2 GetDirection(SteeringAgent agent)
+        public Vector2 GetDirection(SteeringAgent agent, Vector2 currentDirection, float velocity, float tickFactor)
         {
-            var finalVector = Vector2.Zero;
-            var flowVector = agent.GetNextDirectionVector(_gameMap, DijkstraGrid, 6F);
-
-
+            var flowVector = agent.GetNextDirectionVector(DijkstraGrid);
+            
             var avoidanceVector = Vector2.Zero;
             if (SteeringOptions.EnableAvoidAgents)
             {
@@ -90,9 +90,9 @@ namespace Dck.Pathfinder
                         dist = dist2;
                         mostThreatening = entity;
                     }
-                    //TODO: if more than 1 collision unlucky F
 
-                    var ahead = agent.Position + flowVector * 6 * Time.deltaTime;
+                    //TODO: if more than 1 collision unlucky F
+                    var ahead = agent.Position + flowVector * velocity * tickFactor;
                     avoidanceVector = ahead - mostThreatening.Position;
                     avoidanceVector = Vector2.Normalize(avoidanceVector) * SteeringOptions.AvoidAgentsForce;
                 }
@@ -101,14 +101,50 @@ namespace Dck.Pathfinder
             var avoidObstaclesVector = Vector2.Zero;
             if (SteeringOptions.EnableAvoidObstacles)
             {
-                //var neighbours = DijkstraGrid.StraightNeighboursOf() 
+                var neighbours =
+                    DijkstraGrid.StraightNeighboursOf((int) agent.CellPos.X, (int) agent.CellPos.Y,
+                        DijkstraGrid.DijkstraTiles, _gameMap, new [] {MapCellType.Wall});
+                var dijkstraTiles = neighbours.ToList();
+                if (dijkstraTiles.Any())
+                {
+                    Vector2? mostThreatening = null;
+                    var dist = float.MaxValue;
+                    foreach (var cell in dijkstraTiles)
+                    {
+                        var type = _gameMap.GetCellAt(cell.Position.X, cell.Position.Y);
+                        Debug.Log( type);
+                        if (type == MapCellType.Clear) continue;
+                        var cellWorld = _gameMap.GetWorldPositionFromCell(cell.Position.X, cell.Position.Y);
+                        var dist2 = (cellWorld - agent.Position).LengthSquared();
+                        
+                        
+                        if (!(dist2 < dist)) continue;
+                        dist = dist2;
+                        mostThreatening = cellWorld;
+                    }
+                    
+                    if (mostThreatening != null)
+                    {
+                        if (Math.Sqrt(dist) < agent.ColliderRadius + GameMap.CellSize / 2)
+                        {
+                            var ahead = agent.Position + flowVector * velocity * tickFactor;
+                            avoidObstaclesVector = ahead - mostThreatening.Value;
+                            avoidObstaclesVector = Vector2.Normalize(avoidObstaclesVector) *
+                                                   SteeringOptions.AvoidObstaclesForce;
+                            Debug.Log("wall");
+                        }
+                    }
+                }
             }
 
+            var finalVector = flowVector + avoidanceVector + avoidObstaclesVector;
             if (SteeringOptions.EnableSteering)
             {
+                var steeringVector = finalVector - currentDirection;
+                finalVector = currentDirection + steeringVector * SteeringOptions.SteeringForce * velocity;
             }
 
-            return flowVector + avoidanceVector;
+            return finalVector;
 
             // var collidingEntity = colliding.First();
             // v2 -= collidingEntity.Position;
@@ -117,13 +153,15 @@ namespace Dck.Pathfinder
         }
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public static class SteeringOptions
     {
         public static bool EnableSteering = true;
         public static bool EnableAvoidAgents = true;
         public static bool EnableAvoidObstacles = true;
-        public const float SteeringForce = 0.0075F;
-        public const float AvoidAgentsForce = 0.4F;
-        public const float AvoidObstaclesForce = 0.6F;
+        public static float AgentsSpeed = 6F;
+        public static float SteeringForce = 0.0075F;
+        public static float AvoidAgentsForce = 0.4F;
+        public static float AvoidObstaclesForce = 0.6F;
     }
 }

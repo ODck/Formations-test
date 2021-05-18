@@ -73,7 +73,7 @@ namespace Dck.Pathfinder
             while (toCheckNeighbours.Count > 0)
             {
                 var tile = toCheckNeighbours.Dequeue();
-                var neighbours = StraightNeighboursOf(tile, DijkstraTiles, _gameMap);
+                var neighbours = StraightNeighboursOf(tile, DijkstraTiles, _gameMap, new [] {MapCellType.Clear});
 
                 foreach (var dijkstraTile in neighbours.Where(dijkstraTile => !visited.Contains(dijkstraTile)))
                 {
@@ -129,35 +129,42 @@ namespace Dck.Pathfinder
             }
         }
 
+        public static IEnumerable<DijkstraTile> StraightNeighboursOf(int x, int y, DijkstraTile[,] tiles,
+            GameMap gameMap, MapCellType[] allowedCells)
+        {
+            var tile = tiles[x, y];
+            return StraightNeighboursOf(tile, tiles, gameMap, allowedCells);
+        }
+
         public static IEnumerable<DijkstraTile> StraightNeighboursOf(DijkstraTile tile, DijkstraTile[,] tiles,
-            GameMap gameMap)
+            GameMap gameMap, MapCellType[] allowedCells)
         {
             var neighbours = new List<DijkstraTile>();
             if (tile.Position.X > 0)
             {
                 var dijkstraTile = tiles[(int) (tile.Position.X - 1), (int) tile.Position.Y];
-                if (gameMap.GetCellAt(tile.Position.X - 1, tile.Position.Y) != MapCellType.Wall)
+                if (allowedCells.Contains(gameMap.GetCellAt(tile.Position.X - 1, tile.Position.Y)))
                     neighbours.Add(dijkstraTile);
             }
 
             if (tile.Position.Y > 0)
             {
                 var dijkstraTile = tiles[(int) tile.Position.X, (int) (tile.Position.Y - 1)];
-                if (gameMap.GetCellAt(tile.Position.X, tile.Position.Y - 1) != MapCellType.Wall)
+                if (allowedCells.Contains(gameMap.GetCellAt(tile.Position.X, tile.Position.Y - 1)))
                     neighbours.Add(dijkstraTile);
             }
 
             if (tile.Position.X < tiles.GetLength(0) - 1)
             {
                 var dijkstraTile = tiles[(int) (tile.Position.X + 1), (int) tile.Position.Y];
-                if (gameMap.GetCellAt(tile.Position.X + 1, tile.Position.Y) != MapCellType.Wall)
+                if (allowedCells.Contains(gameMap.GetCellAt(tile.Position.X + 1, tile.Position.Y)))
                     neighbours.Add(dijkstraTile);
             }
 
             if (tile.Position.Y < tiles.GetLength(1) - 1)
             {
                 var dijkstraTile = tiles[(int) tile.Position.X, (int) (tile.Position.Y + 1)];
-                if (gameMap.GetCellAt(tile.Position.X, tile.Position.Y + 1) != MapCellType.Wall)
+                if (allowedCells.Contains(gameMap.GetCellAt(tile.Position.X, tile.Position.Y + 1)))
                     neighbours.Add(dijkstraTile);
             }
 

@@ -12,7 +12,7 @@ namespace Dck.Pathfinder
 
         public const float CellSize = 1.0f;
 
-        private readonly MapCellType[] _grid;
+        public readonly MapCellType[] _grid;
         private readonly Random _random = new Random();
 
         private const int MinMapDimension = 16;
