@@ -6,11 +6,13 @@ namespace Dck.Pathfinder
 {
     public class SteeringAgent
     {
+        public readonly float ColliderRadius = 0.5F;
         private Vector2 _direction;
         public Vector2 Position;
         public Vector2Uint CellPos { get; private set; }
-        private const float Smooth = 0.09F;//0.0075F;
+        private const float Smooth = 0.0075F;
         public bool SteeringActive { get; set; } = true;
+        public bool AvoidOthers { get; set; } = true;
 
         public Vector2 GetNextDirectionVector(GameMap gameMap, DijkstraGrid grid, float velocity)
         {

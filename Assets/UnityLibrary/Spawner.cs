@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityLibrary
@@ -10,6 +11,21 @@ namespace UnityLibrary
 
         [SerializeField] private DrawAgent agentPrefab;
         [SerializeField] private DrawDestination destinationPrefab;
+
+        private void Update()
+        {
+            try
+            {
+                destinations.ForEach(x => x.pathFinder.BeginFollowerRegister());
+                agents.ForEach(x => x.destination.pathFinder.AddFollower(x.agent));
+                destinations.ForEach(x => x.pathFinder.EndFollowerRegister());
+                agents.ForEach(x => x.Move());
+            }
+            catch
+            {
+                //Ignore
+            }
+        }
 
         public void SpawnAgent()
         {

@@ -13,13 +13,13 @@ namespace Dck.Pathfinder
     {
         public readonly DijkstraTile[,] DijkstraTiles;
         public DijkstraTile Destination { get; private set; }
-        private readonly GameMap _gameMap;
+        protected readonly GameMap _gameMap;
         public Vector2Uint GridSize { get; }
 
         public uint Columns => GridSize.X;
         public uint Rows => GridSize.Y;
 
-        private DijkstraGrid(DijkstraTile[,] tiles, DijkstraTile target, GameMap gameMap)
+        protected DijkstraGrid(DijkstraTile[,] tiles, DijkstraTile target, GameMap gameMap)
         {
             GridSize = new Vector2Uint(tiles.GetLength(0), tiles.GetLength(1));
             CheckGridSize(GridSize);
@@ -58,11 +58,12 @@ namespace Dck.Pathfinder
             }
 
             if (destination == null) throw new NullReferenceException("destination is null");
-            SetWeights(gameMap, destination, tiles);
-            return new DijkstraGrid(tiles, destination, gameMap);
+            var grid = new DijkstraGrid(tiles, destination, gameMap);
+            grid.SetWeights(destination);
+            return grid;
         }
 
-        private static void SetWeights(GameMap gameMap, DijkstraTile destination, DijkstraTile[,] tiles)
+        protected virtual void SetWeights(DijkstraTile destination)
         {
             destination.Weight = 0;
             var toCheckNeighbours = new Queue<DijkstraTile>();
@@ -72,7 +73,7 @@ namespace Dck.Pathfinder
             while (toCheckNeighbours.Count > 0)
             {
                 var tile = toCheckNeighbours.Dequeue();
-                var neighbours = StraightNeighboursOf(tile, tiles, gameMap);
+                var neighbours = StraightNeighboursOf(tile, DijkstraTiles, _gameMap);
 
                 foreach (var dijkstraTile in neighbours.Where(dijkstraTile => !visited.Contains(dijkstraTile)))
                 {
@@ -128,7 +129,7 @@ namespace Dck.Pathfinder
             }
         }
 
-        private static IEnumerable<DijkstraTile> StraightNeighboursOf(DijkstraTile tile, DijkstraTile[,] tiles,
+        public static IEnumerable<DijkstraTile> StraightNeighboursOf(DijkstraTile tile, DijkstraTile[,] tiles,
             GameMap gameMap)
         {
             var neighbours = new List<DijkstraTile>();
@@ -247,7 +248,7 @@ namespace Dck.Pathfinder
         private void RecalculateGrid(uint x, uint y)
         {
             Destination = DijkstraTiles[x, y];
-            SetWeights(_gameMap, Destination, DijkstraTiles);
+            SetWeights(Destination);
             GenerateFlowField();
         }
     }

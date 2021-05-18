@@ -10,14 +10,12 @@ namespace UnityLibrary
 {
     public class DrawDestination : MonoBehaviour
     {
-        public bool debugFlow;
+        public bool debugFlow = true;
         private GameMap _gameMap;
-        private DijkstraGrid _flowField;
         public DrawMesh mesh;
+        public PathFinder pathFinder;
         public GameObject pref;
-        public DijkstraGrid FlowField => _flowField;
         private readonly Random _random = new Random();
-
 
         private void Start()
         {
@@ -25,24 +23,42 @@ namespace UnityLibrary
             var position = transform.position;
             var pos = _gameMap.GetCellPositionFromWorld(position.x, position.z);
 
-            _flowField = DijkstraGrid.CreateFromGameMap(_gameMap, pos.X, pos.Y);
+            var flowField = DijkstraGrid.CreateFromGameMap(_gameMap, pos.X, pos.Y);
+            Debug.Log(flowField.DijkstraTiles.Length);
+            pathFinder = new PathFinder(flowField, _gameMap);
         }
-
-        private void Update()
+        
+        public void RandomizeDestination()
         {
-            var position = transform.position.Vector3ToVector2();
-            var newPos = _gameMap.GetCellPositionFromWorld(position.X, position.Y);
-            _flowField.TryRecalculateGrid(newPos.X, newPos.Y);
+            Debug.Assert(_gameMap != null, "_gameMap != null");
+            if (_gameMap == null)
+            {
+                Invoke(nameof(RandomizeDestination), 0.001F);
+                return;
+            }
+            var i = (uint) _random.Next(0, (int) _gameMap.Width);
+            var j = (uint) _random.Next(0, (int) _gameMap.Height);
+            var tileType = _gameMap.GetCellAt(i, j);
+            if (tileType != MapCellType.Clear)
+            {
+                RandomizeDestination();
+                return;
+            }
+            var pos = _gameMap.GetWorldPositionFromCell(i, j);
+            transform.position = pos.PositionToVector3();
+            pathFinder.DijkstraGrid.TryRecalculateGrid(i, j);
+            StartCoroutine(SlowDrawFlowField());
         }
-
-        private List<GameObject> _debugList = new List<GameObject>();
+        
+        private readonly List<GameObject> _debugList = new List<GameObject>();
         private IEnumerator SlowDrawFlowField()
         {
             _debugList.ForEach(Destroy);
             _debugList.Clear();
             if (!debugFlow) yield break;
             yield return null;
-            foreach (var node in _flowField.DijkstraTiles)
+            Debug.Log(pathFinder.DijkstraGrid.DijkstraTiles.Length);
+            foreach (var node in pathFinder.DijkstraGrid.DijkstraTiles)
             {
                 if (node.Weight == int.MaxValue) continue;
                 var dir = node.FlowDirection;
@@ -59,26 +75,6 @@ namespace UnityLibrary
                 //yield return new WaitForSeconds(.05F);
                 //yield return null;
             }
-        }
-
-        public void RandomizeDestination()
-        {
-            if (_gameMap == null)
-            {
-                Invoke(nameof(RandomizeDestination), 0.001F);
-                return;
-            }
-            var i = (uint) _random.Next(0, (int) _gameMap.Width);
-            var j = (uint) _random.Next(0, (int) _gameMap.Height);
-            var tileType = _gameMap.GetCellAt(i, j);
-            if (tileType != MapCellType.Clear)
-            {
-                RandomizeDestination();
-                return;
-            }
-            var pos = _gameMap.GetWorldPositionFromCell(i, j);
-            transform.position = pos.PositionToVector3();
-            StartCoroutine(SlowDrawFlowField());
         }
     }
 }

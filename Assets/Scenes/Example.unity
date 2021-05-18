@@ -156,6 +156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drawMesh: {fileID: 1757506199}
+  destination: {fileID: 0}
 --- !u!136 &219138538
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -860,7 +861,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1986015025}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8be06af7fa64831b24aa720eb83e50f, type: 3}
+  m_Script: {fileID: 11500000, guid: f2f7d67e5ce345b882adbdf28e533702, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   debugFlow: 0

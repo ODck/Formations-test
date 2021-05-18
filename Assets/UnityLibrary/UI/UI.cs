@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -68,7 +69,8 @@ namespace UnityLibrary.UI
 
             GUILayout.EndArea();
 
-            GUILayout.BeginArea(new Rect(175, 15, 125, 100));
+            GUI.Box(new Rect(175,65,125,235),"", GUI.skin.box);
+            GUILayout.BeginArea(new Rect(175, 15, 125, 300));
 
             if (GUILayout.Button(_steering ? "Disable steering" : "Enable steering"))
             {
@@ -80,6 +82,17 @@ namespace UnityLibrary.UI
             {
                 _debugFlow = !_debugFlow;
                 //Draw.debugFlow = _debugFlow;
+            }
+            
+            foreach (var destination in spawner.destinations)
+            {
+                foreach (var pathFinderCollidingEntity in destination.pathFinder._collidingEntities)
+                {
+                    var label = pathFinderCollidingEntity.Key.GetHashCode().ToString()[1];
+                    GUILayout.Label($"{label} => {pathFinderCollidingEntity.Value.Count}");
+                }
+
+                
             }
 
             GUILayout.EndArea();
