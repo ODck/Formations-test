@@ -1,4 +1,5 @@
-﻿using Dck.Pathfinder;
+﻿using System;
+using Dck.Pathfinder;
 using UnityEngine;
 using UnityLibrary.Primitives.Extensions;
 using Random = System.Random;
@@ -16,14 +17,25 @@ namespace UnityLibrary
         private Vector2 _debugDir;
         private readonly Random _random = new Random();
         private float _minWidth, _minHeight, _maxWidth, _maxHeight;
+        private Transform _line;
+        private SpriteRenderer _outSideColor;
+        private Spawner _spawner;
 
+        private void Start()
+        {
+            _line =transform.GetChild(2);
+            _outSideColor = GetComponentInChildren<SpriteRenderer>();
+            _spawner = FindObjectOfType<Spawner>();
+
+        }
 
         private void Update()
         {
             if (destination == null)
             {
-                var dest = FindObjectsOfType<DrawDestination>();
-                destination = dest[_random.Next(0, dest.Length)];
+                var dest = _spawner.destinations;
+                destination = dest[_random.Next(0, dest.Count)];
+                _outSideColor.color = destination.Color;
                 if (destination == null) return;
                 if (_gameMap == null && agent == null)
                 {
@@ -58,6 +70,7 @@ namespace UnityLibrary
                 Mathf.Clamp(pos.z, _minHeight, _maxHeight));
             transform.position = clampedPos;
             _debugDir = dir;
+            _line.LookAt(pos + dir.PositionToVector3());
         }
 
         public void OnDrawGizmos()

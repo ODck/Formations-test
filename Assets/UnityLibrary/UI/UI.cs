@@ -13,8 +13,9 @@ namespace UnityLibrary.UI
         private bool _started;
 
         private Spawner Spawner => spawner ? spawner : throw new NullReferenceException();
-        
+
         private bool _debugFlow = false;
+        private DrawDestination _lastDestination;
 
         private void OnGUI()
         {
@@ -26,6 +27,7 @@ namespace UnityLibrary.UI
                     Spawner.SpawnDestination();
                     _started = true;
                 }
+
                 GUILayout.EndArea();
                 return;
             }
@@ -34,16 +36,21 @@ namespace UnityLibrary.UI
             GUILayout.BeginArea(new Rect(15, 15, 150, 200));
             if (GUILayout.Button("Randomize destination"))
             {
-                Spawner.destinations.ForEach(x=>x.RandomizeDestination());
+                Spawner.destinations.ForEach(x => x.RandomizeDestination());
+                if (_debugFlow)
+                {
+                    _lastDestination?.ClearDrawFlowField();
+                    _lastDestination?.StartSlowDraw();
+                }
             }
 
             if (GUILayout.Button("Shuffle Agents"))
             {
                 Spawner.ShuffleAgents();
             }
-            
+
             GUILayout.Label("Spawn ---");
-            
+
             if (GUILayout.Button("Spawn Agent"))
             {
                 Spawner.SpawnAgent();
@@ -55,7 +62,7 @@ namespace UnityLibrary.UI
             }
 
             GUILayout.Label("Clean ---");
-            
+
             if (GUILayout.Button("Clean Destinations"))
             {
                 Spawner.DestroyExtraDestinations();
@@ -68,30 +75,66 @@ namespace UnityLibrary.UI
 
             GUILayout.EndArea();
 
-            GUI.Box(new Rect(175,115,125,185),"", GUI.skin.box);
-            GUILayout.BeginArea(new Rect(175, 15, 125, 300));
+            var offset = (_debugFlow ? 30 : 0);
+            offset += _lastDestination != null ? 25 : 0;
+            GUI.Box(new Rect(175, 115+ offset, 125, 185+offset), "", GUI.skin.box);
+            GUILayout.BeginArea(new Rect(175, 15, 125, 400 + offset));
 
             if (GUILayout.Button(SteeringOptions.EnableSteering ? "Disable steering" : "Enable steering"))
             {
                 SteeringOptions.EnableSteering = !SteeringOptions.EnableSteering;
             }
-            
+
             if (GUILayout.Button(SteeringOptions.EnableAvoidAgents ? "Disable avoid/other" : "Enable avoid/other"))
             {
                 SteeringOptions.EnableAvoidAgents = !SteeringOptions.EnableAvoidAgents;
             }
-            
+
             if (GUILayout.Button(SteeringOptions.EnableAvoidObstacles ? "Disable avoid/wall" : "Enable avoid/wall"))
             {
                 SteeringOptions.EnableAvoidObstacles = !SteeringOptions.EnableAvoidObstacles;
             }
-            
+
             if (GUILayout.Button(_debugFlow ? "Disable flow debug" : "Enable flow debug"))
             {
                 _debugFlow = !_debugFlow;
                 //Draw.debugFlow = _debugFlow;
             }
-            
+
+            if (_debugFlow)
+            {
+                GUILayout.Space(5);
+                if (_lastDestination != null)
+                {
+                    var button = ScriptableObject.CreateInstance<GUISkin>().button;
+                    button.normal.background = MakeTex(1, 1, _lastDestination.Color);
+                    //button.contentOffset = new Vector2(5, 0);
+                    //button.border = new RectOffset(0, 0, 20, 20);
+                    GUILayout.Button("  Active Destination", button);
+                    GUILayout.Space(10);
+                }
+
+                GUILayout.BeginHorizontal();
+                foreach (var destination in spawner.destinations)
+                {
+                    var button = ScriptableObject.CreateInstance<GUISkin>().button;
+                    button.normal.background = MakeTex(1, 1, destination.Color);
+                    if (GUILayout.Button("", button))
+                    {
+                        _lastDestination?.ClearDrawFlowField();
+                        _lastDestination = destination;
+                        _lastDestination.StartSlowDraw();
+                    }
+                }
+
+                GUILayout.EndHorizontal();
+            }
+            else
+            {
+                _lastDestination?.ClearDrawFlowField();
+                _lastDestination = null;
+            }
+
             GUILayout.Label($"Agents Speed {SteeringOptions.AgentsSpeed:f4}");
             SteeringOptions.AgentsSpeed = GUILayout.HorizontalSlider(SteeringOptions.AgentsSpeed, 0, 20);
             GUILayout.Label($"Steering Force {SteeringOptions.SteeringForce:f4}");
@@ -99,9 +142,24 @@ namespace UnityLibrary.UI
             GUILayout.Label($"Agents Force {SteeringOptions.AvoidAgentsForce:f4}");
             SteeringOptions.AvoidAgentsForce = GUILayout.HorizontalSlider(SteeringOptions.AvoidAgentsForce, 0, 1F);
             GUILayout.Label($"Walls Force {SteeringOptions.AvoidObstaclesForce:f4}");
-            SteeringOptions.AvoidObstaclesForce = GUILayout.HorizontalSlider(SteeringOptions.AvoidObstaclesForce, 0, 1F);
+            SteeringOptions.AvoidObstaclesForce =
+                GUILayout.HorizontalSlider(SteeringOptions.AvoidObstaclesForce, 0, 1F);
 
             GUILayout.EndArea();
+        }
+
+        private Texture2D MakeTex(int width, int height, Color col)
+        {
+            var pix = new Color[width * height];
+
+            for (var i = 0; i < pix.Length; i++)
+                pix[i] = col;
+
+            var result = new Texture2D(width, height);
+            result.SetPixels(pix);
+            result.Apply();
+
+            return result;
         }
     }
 }

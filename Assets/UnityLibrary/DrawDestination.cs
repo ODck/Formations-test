@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Dck.Pathfinder;
 using TMPro;
@@ -10,12 +11,13 @@ namespace UnityLibrary
 {
     public class DrawDestination : MonoBehaviour
     {
-        public bool debugFlow = true;
         private GameMap _gameMap;
         public DrawMesh mesh;
         public PathFinder pathFinder;
         public GameObject pref;
         private readonly Random _random = new Random();
+        private Color _destColor;
+        public Color Color => _destColor;
 
         private void Start()
         {
@@ -26,8 +28,10 @@ namespace UnityLibrary
             var flowField = DijkstraGrid.CreateFromGameMap(_gameMap, pos.X, pos.Y);
             Debug.Log(flowField.DijkstraTiles.Length);
             pathFinder = new PathFinder(flowField, _gameMap);
+            _destColor = UnityEngine.Random.ColorHSV(0, 1, 1, 1, 0.5F, 1);
+            GetComponentInChildren<Renderer>().material.color = _destColor;
         }
-        
+
         public void RandomizeDestination()
         {
             Debug.Assert(_gameMap != null, "_gameMap != null");
@@ -36,6 +40,7 @@ namespace UnityLibrary
                 Invoke(nameof(RandomizeDestination), 0.001F);
                 return;
             }
+
             var i = (uint) _random.Next(0, (int) _gameMap.Width);
             var j = (uint) _random.Next(0, (int) _gameMap.Height);
             var tileType = _gameMap.GetCellAt(i, j);
@@ -44,20 +49,18 @@ namespace UnityLibrary
                 RandomizeDestination();
                 return;
             }
+
             var pos = _gameMap.GetWorldPositionFromCell(i, j);
             transform.position = pos.PositionToVector3();
             pathFinder.DijkstraGrid.TryRecalculateGrid(i, j);
-            StartCoroutine(SlowDrawFlowField());
         }
-        
+
         private readonly List<GameObject> _debugList = new List<GameObject>();
+
+        public void StartSlowDraw() => StartCoroutine(SlowDrawFlowField());
         private IEnumerator SlowDrawFlowField()
         {
-            _debugList.ForEach(Destroy);
-            _debugList.Clear();
-            if (!debugFlow) yield break;
             yield return null;
-            Debug.Log(pathFinder.DijkstraGrid.DijkstraTiles.Length);
             foreach (var node in pathFinder.DijkstraGrid.DijkstraTiles)
             {
                 if (node.Weight == int.MaxValue) continue;
@@ -72,9 +75,18 @@ namespace UnityLibrary
                 var cellPosition = _gameMap.GetWorldPositionFromCell(node.Position.X, node.Position.Y);
                 // ReSharper disable once Unity.InefficientPropertyAccess
                 go.transform.position = new Vector3(cellPosition.X, 0, cellPosition.Y);
-                //yield return new WaitForSeconds(.05F);
-                //yield return null;
             }
+        }
+
+        public void ClearDrawFlowField()
+        {
+            _debugList.ForEach(Destroy);
+            _debugList.Clear();
+        }
+
+        private void OnDestroy()
+        {
+            ClearDrawFlowField();
         }
     }
 }

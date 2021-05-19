@@ -13,7 +13,7 @@ namespace Dck.Pathfinder
         private readonly HashSet<SteeringAgent> _followers = new HashSet<SteeringAgent>();
         public readonly DijkstraGrid DijkstraGrid;
 
-        public readonly Dictionary<SteeringAgent, HashSet<SteeringAgent>> _collidingEntities =
+        private readonly Dictionary<SteeringAgent, HashSet<SteeringAgent>> _collidingEntities =
             new Dictionary<SteeringAgent, HashSet<SteeringAgent>>();
 
         private readonly GameMap _gameMap;
@@ -112,7 +112,6 @@ namespace Dck.Pathfinder
                     foreach (var cell in dijkstraTiles)
                     {
                         var type = _gameMap.GetCellAt(cell.Position.X, cell.Position.Y);
-                        Debug.Log( type);
                         if (type == MapCellType.Clear) continue;
                         var cellWorld = _gameMap.GetWorldPositionFromCell(cell.Position.X, cell.Position.Y);
                         var dist2 = (cellWorld - agent.Position).LengthSquared();
@@ -131,7 +130,6 @@ namespace Dck.Pathfinder
                             avoidObstaclesVector = ahead - mostThreatening.Value;
                             avoidObstaclesVector = Vector2.Normalize(avoidObstaclesVector) *
                                                    SteeringOptions.AvoidObstaclesForce;
-                            Debug.Log("wall");
                         }
                     }
                 }
