@@ -9,6 +9,7 @@ namespace Dck.Pathfinder
         public readonly float ColliderRadius = 0.5F;
         private Vector2 _position;
         private readonly GameMap _gameMap;
+        public Vector2 LastKnownDirection;
 
         public Vector2 Position
         {

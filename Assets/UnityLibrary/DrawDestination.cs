@@ -66,6 +66,7 @@ namespace UnityLibrary
                 if (node.Weight == int.MaxValue) continue;
                 var dir = node.FlowDirection;
                 var go = Instantiate(pref);
+                go.SetActive(true);
                 _debugList.Add(go);
                 go.transform.position = Vector3.zero;
                 go.transform.LookAt(new Vector3(dir.X, 0, dir.Y));

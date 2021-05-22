@@ -1,4 +1,5 @@
-﻿using Dck.Pathfinder;
+﻿using System;
+using Dck.Pathfinder;
 using Newtonsoft.Json;
 using Settings;
 using UnityEngine;
@@ -15,6 +16,9 @@ namespace UnityLibrary
             gameMap = new GameMap((uint) SettingsLoader.MapWidth, (uint) SettingsLoader.MapHeight);
             gameMap.FillWithRandomBlockType(20, MapCellType.Wall);
             DrawCells();
+            PhysicsWorld.Init(gameMap);
+            Debug.Log(gameMap.GetWorldPositionFromSimulated(0, 0));
+            Debug.Log(gameMap.GetWorldPositionFromSimulated(gameMap.Width, gameMap.Height));
             //DrawConnections();
         }
 
@@ -43,6 +47,11 @@ namespace UnityLibrary
             {
                 plane.GetComponent<Renderer>().material.color = Color.black;
             }
+        }
+
+        private void Update()
+        {
+            //Debug.Log(PhysicsWorld.World.BodyCount);
         }
     }
 }

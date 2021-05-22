@@ -16,10 +16,9 @@ namespace UnityLibrary
         {
             try
             {
-                destinations.ForEach(x => x.pathFinder.BeginFollowerRegister());
-                agents.ForEach(x => x.destination.pathFinder.AddFollower(x.agent));
-                destinations.ForEach(x => x.pathFinder.EndFollowerRegister());
-                agents.ForEach(x => x.Move());
+                agents.ForEach(x => x.MoveBody());
+                PhysicsWorld.World.Step(Time.deltaTime, 10, 8);
+                agents.ForEach(x => x.ApplyTranslate());
             }
             catch
             {

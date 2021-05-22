@@ -98,20 +98,27 @@ namespace Dck.Pathfinder
 
         public Vector2 GetWorldPositionFromCell(uint x, uint y)
         {
-            var x1 = x - (float)Math.Floor((float) (Width / 2F)) + CellSize/2;
-            var y1 = y - (float)Math.Floor((float) (Height / 2F)) + CellSize/2;
+            var x1 = x - (float) Math.Floor((float) (Width / 2F)) + CellSize / 2;
+            var y1 = y - (float) Math.Floor((float) (Height / 2F)) + CellSize / 2;
+            return new Vector2(x1, y1);
+        }
+        
+        public Vector2 GetWorldPositionFromSimulated(float x, float y)
+        {
+            var x1 = x - Width / 2F + CellSize / 2;
+            var y1 = y - Height / 2F + CellSize / 2;
             return new Vector2(x1, y1);
         }
 
-        public void ClampPositionToGameMapBounds(ref Vector2 position)
+        public bool InsideMap(Vector2 position, out float virtualX, out float virtualY)
         {
-            position.X = MathUtils.Clamp(position.X,
-                -(Width / 2F) + PositionEpsilon,
-                Width / 2F - PositionEpsilon);
+            const uint cellWidth = (uint) CellSize;
+            const uint cellHeight = (uint) CellSize;
 
-            position.Y = MathUtils.Clamp(position.Y,
-                -(Height / 2F + PositionEpsilon),
-                Height / 2F - PositionEpsilon);
+            virtualX = position.X + Width / 2F;
+            virtualY = position.Y + Height / 2F;
+            return !(virtualX < 0) && !(virtualX >= Width / cellWidth) && !(virtualY < 0) && !(virtualY >= Height / cellHeight);
         }
+        
     }
 }
