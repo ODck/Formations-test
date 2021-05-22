@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Box2DSharp.Dynamics;
 using Dck.Pathfinder.Primitives;
 using UnityEngine;
@@ -12,48 +10,54 @@ namespace Dck.Pathfinder
 {
     public class PathFinder
     {
-        //private readonly Dictionary<SteeringAgent, IBox> _followers = new Dictionary<SteeringAgent, IBox>();
         public readonly DijkstraGrid DijkstraGrid;
-
+        private readonly HashSet<Body> _followers = new HashSet<Body>();
         private readonly GameMap _gameMap;
-        //private World _humperWorld;
 
         public PathFinder(DijkstraGrid dijkstraGrid, GameMap gameMap)
         {
             DijkstraGrid = dijkstraGrid;
             _gameMap = gameMap;
-            //_humperWorld = new World(_gameMap.Width, _gameMap.Height);
+        }
+
+        public void CleanContacts()
+        {
+            _followers.Clear();
+        }
+
+        public void AddFollower(Body body)
+        {
+            _followers.Add(body);
         }
 
         //https://gamedevelopment.tutsplus.com/tutorials/understanding-steering-behaviors-collision-avoidance--gamedev-7777
-        public Vector2 GetDirection(SteeringAgent agent, Body body, Vector2 currentDirection, float velocity, float tickFactor)
+        public Vector2 GetDirection(SteeringAgent agent, Body body, Vector2 currentDirection, float velocity,
+            float tickFactor)
         {
             var flowVector = agent.GetNextDirectionVector(DijkstraGrid);
             var finalVector = currentDirection;
-            
-            
+
+
             if (SteeringOptions.EnableSteering)
             {
                 var steeringVector = Vector2Extensions.Truncate(flowVector, SteeringOptions.SteeringForce * velocity);
                 finalVector += steeringVector;
-                // var steeringVector = finalVector - currentDirection;
-                // finalVector = currentDirection + steeringVector * SteeringOptions.SteeringForce * velocity;
             }
-            
+
             if (SteeringOptions.EnableAvoidAgents)
             {
                 var ray = new RayCastAvoidAgents(body.UserData);
                 var position = body.GetTransform().Position;
-                //var aheadPoint = body.GetTransform().Position + Vector2Extensions.Truncate(finalVector, agent.ColliderRadius);
-                
-                
-                PhysicsWorld.World.RayCast(ray, position, position+ Vector2.Normalize(currentDirection));
+
+
+                PhysicsWorld.World.RayCast(ray, position, position + Vector2.Normalize(currentDirection));
                 if (ray.Hit)
                 {
-                    Debug.Log("HITTTT!!");
-                    var avoidVector = position - ray.BodyCenter;
-                    Debug.Log(avoidVector + " HITS");
-                    finalVector += Vector2Extensions.Truncate(avoidVector, SteeringOptions.AvoidAgentsForce);
+                    if (SteeringOptions.EnableAvoidAll || _followers.Contains(ray.Body))
+                    {
+                        var avoidVector = position - ray.Body.GetPosition();
+                        finalVector += Vector2Extensions.Truncate(avoidVector, SteeringOptions.AvoidAgentsForce);
+                    }
                 }
                 else
                 {
@@ -64,6 +68,7 @@ namespace Dck.Pathfinder
                         var dist = float.MaxValue;
                         foreach (var fixture2 in PhysicsWorld.ContactListener.Contacts[fixture])
                         {
+                            if (!SteeringOptions.EnableAvoidAll && !_followers.Contains(fixture.Body)) continue;
                             var distance = (position - fixture2.Body.GetPosition()).LengthSquared();
                             if (!(distance < dist)) continue;
                             dist = distance;
@@ -72,7 +77,6 @@ namespace Dck.Pathfinder
 
                         if (body2 == null) continue;
                         var avoidVector = position - body2.GetPosition();
-                        Debug.Log(avoidVector + " HITS22222");
                         finalVector += Vector2Extensions.Truncate(avoidVector, SteeringOptions.AvoidAgentsOverlap);
                     }
                 }
@@ -88,14 +92,14 @@ namespace Dck.Pathfinder
     {
         public static bool EnableSteering = true;
         public static bool EnableAvoidAgents = true;
-        public static bool EnableAvoidObstacles = true;
+        public static bool EnableAvoidAll = true;
         public static float AgentsSpeed = 6F;
         public static float StopRange = 1F;
         public static float SteeringForce = 0.077F;
         public static float AvoidAgentsForce = 0.46F;
         public static float AvoidAgentsOverlap = 0.17F;
     }
-    
+
     public class RayCastAvoidAgents : IRayCastCallback
     {
         public bool Hit;
@@ -103,7 +107,7 @@ namespace Dck.Pathfinder
         public Vector2 Normal;
 
         public Vector2 Point;
-        public Vector2 BodyCenter;
+        public Body Body;
         private readonly object _casterData;
 
         public RayCastAvoidAgents(object casterData)
@@ -116,7 +120,7 @@ namespace Dck.Pathfinder
         {
             var body = fixture.Body;
             var userData = body.UserData;
-            if (fixture.Filter.CategoryBits != PhysicsCategory.CATEGORY_MINION) return - 1;
+            if (fixture.Filter.CategoryBits != PhysicsCategory.CATEGORY_MINION) return -1;
             if (userData != _casterData)
             {
                 // By returning -1, we instruct the calling code to ignore this fixture and
@@ -126,7 +130,7 @@ namespace Dck.Pathfinder
 
             Hit = true;
             Point = point;
-            BodyCenter = fixture.Body.GetPosition();
+            Body = body;
             Normal = normal;
 
             // By returning the current fraction, we instruct the calling code to clip the ray and
@@ -134,6 +138,5 @@ namespace Dck.Pathfinder
             // are reported in order. However, by clipping, we can always get the closest fixture.
             return fraction;
         }
-        
     }
 }

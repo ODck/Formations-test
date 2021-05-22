@@ -23,8 +23,8 @@ namespace UnityLibrary.UI
                 SteeringOptions.EnableSteering = PlayerPrefs.GetInt(nameof(SteeringOptions.EnableSteering))==1;
             if(PlayerPrefs.HasKey(nameof(SteeringOptions.EnableAvoidAgents)))
                 SteeringOptions.EnableAvoidAgents = PlayerPrefs.GetInt(nameof(SteeringOptions.EnableAvoidAgents))==1;
-            if(PlayerPrefs.HasKey(nameof(SteeringOptions.EnableAvoidObstacles)))
-                SteeringOptions.EnableAvoidObstacles = PlayerPrefs.GetInt(nameof(SteeringOptions.EnableAvoidObstacles))==1;
+            if(PlayerPrefs.HasKey(nameof(SteeringOptions.EnableAvoidAll)))
+                SteeringOptions.EnableAvoidAll = PlayerPrefs.GetInt(nameof(SteeringOptions.EnableAvoidAll))==1;
             if(PlayerPrefs.HasKey(nameof(SteeringOptions.AgentsSpeed)))
                 SteeringOptions.AgentsSpeed = PlayerPrefs.GetFloat(nameof(SteeringOptions.AgentsSpeed));
             if(PlayerPrefs.HasKey(nameof(SteeringOptions.StopRange)))
@@ -108,22 +108,22 @@ namespace UnityLibrary.UI
             GUI.Box(new Rect(175, 115+ offset, 125, 225+offset), "", GUI.skin.box);
             GUILayout.BeginArea(new Rect(175, 15, 125, 400 + offset));
 
-            if (GUILayout.Button(SteeringOptions.EnableSteering ? "Disable steering" : "Enable steering"))
+            if (GUILayout.Button(SteeringOptions.EnableSteering ? "D steering" : "E steering"))
             {
                 SteeringOptions.EnableSteering = !SteeringOptions.EnableSteering;
                 PlayerPrefs.SetInt(nameof(SteeringOptions.EnableSteering), SteeringOptions.EnableSteering ? 1:0);
             }
 
-            if (GUILayout.Button(SteeringOptions.EnableAvoidAgents ? "Disable avoid/other" : "Enable avoid/other"))
+            if (GUILayout.Button(SteeringOptions.EnableAvoidAgents ? "D avoid agents" : "E avoid agents"))
             {
                 SteeringOptions.EnableAvoidAgents = !SteeringOptions.EnableAvoidAgents;
                 PlayerPrefs.SetInt(nameof(SteeringOptions.EnableAvoidAgents), SteeringOptions.EnableAvoidAgents ? 1:0);
             }
 
-            if (GUILayout.Button(SteeringOptions.EnableAvoidObstacles ? "Disable avoid/wall" : "Enable avoid/wall"))
+            if (GUILayout.Button(SteeringOptions.EnableAvoidAll ? "D different color" : "E different color "))
             {
-                SteeringOptions.EnableAvoidObstacles = !SteeringOptions.EnableAvoidObstacles;
-                PlayerPrefs.SetInt(nameof(SteeringOptions.EnableAvoidObstacles), SteeringOptions.EnableAvoidObstacles ? 1:0);
+                SteeringOptions.EnableAvoidAll = !SteeringOptions.EnableAvoidAll;
+                PlayerPrefs.SetInt(nameof(SteeringOptions.EnableAvoidAll), SteeringOptions.EnableAvoidAll ? 1:0);
             }
 
             if (GUILayout.Button(_debugFlow ? "Disable flow debug" : "Enable flow debug"))

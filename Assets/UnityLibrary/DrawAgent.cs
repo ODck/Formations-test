@@ -23,7 +23,7 @@ namespace UnityLibrary
         private Transform _line;
         private SpriteRenderer _outSideColor;
         private Spawner _spawner;
-        private Body _2dBody;
+        public Body _2dBody;
 
         private void Start()
         {

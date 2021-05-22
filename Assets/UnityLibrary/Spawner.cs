@@ -16,6 +16,8 @@ namespace UnityLibrary
         {
             try
             {
+                destinations.ForEach(x=> x.pathFinder.CleanContacts());
+                agents.ForEach(x=>x.destination.pathFinder.AddFollower(x._2dBody));
                 agents.ForEach(x => x.MoveBody());
                 PhysicsWorld.World.Step(Time.deltaTime, 10, 8);
                 agents.ForEach(x => x.ApplyTranslate());
