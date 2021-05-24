@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Collections;
 using Dck.Pathfinder;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
+using Random = System.Random;
+using Vector2 = System.Numerics.Vector2;
 
 namespace UnityLibrary.UI
 {
     public class UI : MonoBehaviour
     {
+        [SerializeField] private DrawMesh mesh;
         [SerializeField] private Spawner spawner;
         private bool _started;
+        private int blocks;
 
         private Spawner Spawner => spawner ? spawner : throw new NullReferenceException();
 
@@ -36,13 +37,16 @@ namespace UnityLibrary.UI
             if(PlayerPrefs.HasKey(nameof(SteeringOptions.AvoidAgentsOverlap)))
                 SteeringOptions.AvoidAgentsOverlap = PlayerPrefs.GetFloat(nameof(SteeringOptions.AvoidAgentsOverlap));
             
-        // public static bool EnableSteering = true;
-        // public static bool EnableAvoidAgents = true;
-        // public static bool EnableAvoidObstacles = true;
-        // public static float AgentsSpeed = 6F;
-        // public static float SteeringForce = 0.0075F;
-        // public static float AvoidAgentsForce = 0.04F;
-        // public static float AvoidObstaclesForce = 0.06F;
+            if(PlayerPrefs.HasKey(nameof(blocks)))
+                blocks = PlayerPrefs.GetInt(nameof(blocks));
+            
+            // public static bool EnableSteering = true;
+            // public static bool EnableAvoidAgents = true;
+            // public static bool EnableAvoidObstacles = true;
+            // public static float AgentsSpeed = 6F;
+            // public static float SteeringForce = 0.0075F;
+            // public static float AvoidAgentsForce = 0.04F;
+            // public static float AvoidObstaclesForce = 0.06F;
         }
 
         private void OnGUI()
@@ -50,8 +54,13 @@ namespace UnityLibrary.UI
             if (!_started)
             {
                 GUILayout.BeginArea(new Rect(15, 15, 150, 100));
+                GUILayout.Label($"Blocks: {blocks}");
+                blocks = (int) GUILayout.HorizontalSlider(blocks, 0, 100);
+
                 if (GUILayout.Button("Start"))
                 {
+                    PlayerPrefs.SetInt(nameof(blocks), blocks);
+                    mesh.Init((uint) blocks);
                     Spawner.SpawnDestination();
                     _started = true;
                 }
@@ -61,7 +70,7 @@ namespace UnityLibrary.UI
             }
 
 
-            GUILayout.BeginArea(new Rect(15, 15, 150, 200));
+            GUILayout.BeginArea(new Rect(15, 15, 150, 400));
             if (GUILayout.Button("Randomize destination"))
             {
                 Spawner.destinations.ForEach(x => x.RandomizeDestination());
@@ -101,6 +110,24 @@ namespace UnityLibrary.UI
                 Spawner.DestroyAllAgents();
             }
 
+            GUILayout.FlexibleSpace();
+
+            if (spawner.agents.Count == 0)
+            {
+                GUI.enabled = false;
+            }
+            if (GUILayout.Button("Dash"))
+            {
+                spawner.agents[new Random().Next(0,spawner.agents.Count)].DashInRandomDirection();
+            }
+
+            GUI.enabled = true;
+            
+            if (GUILayout.Button(spawner.enableMovement ? "Stop Movement": "StartMovement"))
+            {
+                spawner.agents.ForEach(x=> x._2dBody.SetLinearVelocity(Vector2.Zero));
+                spawner.enableMovement = !spawner.enableMovement;
+            }
             GUILayout.EndArea();
 
             var offset = (_debugFlow ? 30 : 0);

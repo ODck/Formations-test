@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Dynamics;
 using Dck.Pathfinder;
@@ -24,6 +25,7 @@ namespace UnityLibrary
         private SpriteRenderer _outSideColor;
         private Spawner _spawner;
         public Body _2dBody;
+        public bool movementBlocked;
 
         private void Start()
         {
@@ -96,6 +98,7 @@ namespace UnityLibrary
 
         public void MoveBody()
         {
+            if (movementBlocked) return;
             agent.Position = transform.position.Vector3ToVector2();
 
             if (!((transform.position - destination.transform.position).magnitude > SteeringOptions.StopRange))
@@ -121,8 +124,13 @@ namespace UnityLibrary
         public void ApplyTranslate()
         {
             var pos = _2dBody.GetPosition();
-            pos = new Vector2(Mathf.Clamp(pos.X, 0, _gameMap.Width - 1),
+            var posClamp = new Vector2(Mathf.Clamp(pos.X, 0, _gameMap.Width - 1),
                 Mathf.Clamp(pos.Y, 0, _gameMap.Height - 1));
+            if (pos != posClamp)
+            {
+                pos = posClamp;
+                _2dBody.SetTransform(pos, _2dBody.GetAngle());
+            }
 
             var wPosV3 = _gameMap.GetWorldPositionFromSimulated(pos.X, pos.Y).PositionToVector3();
             transform.position = wPosV3;
@@ -160,6 +168,25 @@ namespace UnityLibrary
             var pos = new Vector2(i, j);
             _2dBody.SetTransform(pos, _2dBody.GetAngle());
             transform.position = _gameMap.GetWorldPositionFromSimulated(i, j).PositionToVector3();
+        }
+
+        public void DashInRandomDirection()
+        {
+            if(movementBlocked) return;
+            StartCoroutine(StartDash());
+        }
+
+        private IEnumerator StartDash()
+        {
+            var vel = SteeringOptions.AgentsSpeed * 3;
+            const float time = 0.3F;
+            movementBlocked = true;
+            var direction = new Vector2(_random.Next(-100, 100) / 100F, _random.Next(-100, 100) / 100F);
+            agent.LastKnownDirection = direction;
+            direction = Vector2.Normalize(direction) * vel;
+            _2dBody.SetLinearVelocity(direction);
+            yield return new WaitForSeconds(time);
+            movementBlocked = false;
         }
 
         private void OnDestroy()

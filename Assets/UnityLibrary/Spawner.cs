@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Vector2 = System.Numerics.Vector2;
 
 namespace UnityLibrary
 {
@@ -8,6 +9,7 @@ namespace UnityLibrary
     {
         public List<DrawAgent> agents = new List<DrawAgent>();
         public List<DrawDestination> destinations = new List<DrawDestination>();
+        public bool enableMovement = true;
 
         [SerializeField] private DrawAgent agentPrefab;
         [SerializeField] private DrawDestination destinationPrefab;
@@ -18,7 +20,8 @@ namespace UnityLibrary
             {
                 destinations.ForEach(x=> x.pathFinder.CleanContacts());
                 agents.ForEach(x=>x.destination.pathFinder.AddFollower(x._2dBody));
-                agents.ForEach(x => x.MoveBody());
+                if(enableMovement)
+                    agents.ForEach(x => x.MoveBody());
                 PhysicsWorld.World.Step(Time.deltaTime, 10, 8);
                 agents.ForEach(x => x.ApplyTranslate());
             }

@@ -11,14 +11,12 @@ namespace UnityLibrary
         public GameMap gameMap;
         public bool color;
 
-        public void Start()
+        public void Init(uint blocks)
         {
             gameMap = new GameMap((uint) SettingsLoader.MapWidth, (uint) SettingsLoader.MapHeight);
-            gameMap.FillWithRandomBlockType(20, MapCellType.Wall);
+            gameMap.FillWithRandomBlockType(blocks, MapCellType.Wall);
             DrawCells();
             PhysicsWorld.Init(gameMap);
-            Debug.Log(gameMap.GetWorldPositionFromSimulated(0, 0));
-            Debug.Log(gameMap.GetWorldPositionFromSimulated(gameMap.Width, gameMap.Height));
             //DrawConnections();
         }
 

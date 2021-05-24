@@ -413,6 +413,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 940cbc4f3d8c4404b76a30f475ddcc12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mesh: {fileID: 1757506199}
   spawner: {fileID: 335878438}
 --- !u!4 &335878437
 Transform:
